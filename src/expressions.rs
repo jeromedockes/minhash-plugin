@@ -48,12 +48,9 @@ struct MinhashKwargs {
     seed: u64,
 }
 
-
 #[polars_expr(output_type=UInt32)]
 fn minhash(inputs: &[Series], kwargs: MinhashKwargs) -> PolarsResult<Series> {
     let ca = inputs[0].str()?;
-    let out: UInt32Chunked = ca.apply_values_generic(|value| {
-        compute_minhash(value, kwargs.seed)
-    });
+    let out: UInt32Chunked = ca.apply_values_generic(|value| compute_minhash(value, kwargs.seed));
     Ok(out.into_series())
 }
