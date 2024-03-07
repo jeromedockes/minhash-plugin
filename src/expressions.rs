@@ -24,7 +24,7 @@ fn make_masks() -> [u64; 8] {
     masks
 }
 
-fn compute_minhash(text: &str, seed: u64) -> u64 {
+fn compute_minhash(text: &str, seed: u64) -> u32 {
     let mut min = u64::MAX;
     let m: u64 = 0x880355f21e6d1965;
     let mut buf = 0u64;
@@ -40,7 +40,7 @@ fn compute_minhash(text: &str, seed: u64) -> u64 {
             min = cmp::min(hash, min);
         }
     }
-    min
+    min.wrapping_sub(min >> 32) as u32
 }
 
 #[derive(Deserialize)]
@@ -49,10 +49,10 @@ struct MinhashKwargs {
 }
 
 
-#[polars_expr(output_type=UInt64)]
+#[polars_expr(output_type=UInt32)]
 fn minhash(inputs: &[Series], kwargs: MinhashKwargs) -> PolarsResult<Series> {
     let ca = inputs[0].str()?;
-    let out: UInt64Chunked = ca.apply_values_generic(|value| {
+    let out: UInt32Chunked = ca.apply_values_generic(|value| {
         compute_minhash(value, kwargs.seed)
     });
     Ok(out.into_series())
