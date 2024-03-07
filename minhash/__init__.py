@@ -12,11 +12,12 @@ if TYPE_CHECKING:
 
 lib = _get_shared_lib_location(__file__)
 
-def pig_latinnify(expr: IntoExpr) -> pl.Expr:
+def minhash(expr: IntoExpr, *, seed: int) -> pl.Expr:
     expr = parse_into_expr(expr)
     return expr.register_plugin(
         lib=lib,
-        symbol="pig_latinnify",
+        symbol="minhash",
         is_elementwise=True,
+        kwargs={"seed": seed}
     )
 
